@@ -33,6 +33,8 @@ if (count($requestTimeFloat) === 1) {
 $requestTs = new MongoDate($time);
 $requestTsMicro = new MongoDate($requestTimeFloat[0], $requestTimeFloat[1]);
 
+$data['_id'] = new MongoId();
+
 $data['meta'] = array(
     'url' => $uri,
     'SERVER' => $__SERVER,
@@ -52,8 +54,6 @@ try {
     $saver = Xhgui_Saver::factory($config);
     $saver->save($data);
 
-    $mongo = new MongoClient($config['db.host'], $config['db.options']);
-    $profiles = new Xhgui_Profiles($mongo->{$config['db.db']});
-    echo $profiles->latest()->getId();
+    echo $data['_id'];
 } catch (Exception $e) {
 }
