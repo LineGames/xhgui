@@ -1,8 +1,4 @@
 <?php
-if (!extension_loaded('xhprof') && !extension_loaded('uprofiler') && !extension_loaded('tideways')) {
-    die('xhgui - either extension xhprof, uprofiler or tideways must be loaded');
-}
-
 $dir = dirname(__DIR__);
 require_once $dir . '/src/Xhgui/Config.php';
 Xhgui_Config::load($dir . '/config/config.default.php');
