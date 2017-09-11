@@ -21,7 +21,7 @@ $__ENV = json_decode($_POST['_ENV'], true);
 
 $uri = $__SERVER['REQUEST_URI'];
 $time = $__SERVER['REQUEST_TIME'];
-$requestTimeFloat = explode('.', $_SERVER['REQUEST_TIME_FLOAT']);
+$requestTimeFloat = explode('.', $__SERVER['REQUEST_TIME_FLOAT']);
 if (count($requestTimeFloat) === 1) {
     $requestTimeFloat[1] = 0;
 }
