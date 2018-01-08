@@ -46,7 +46,7 @@
 /* Tideways support
  * The tideways extension is a fork of xhprof. See https://github.com/tideways/php-profiler-extension
  *
- * It works on PHP 5.5+ and PHP 7 and improves on the ancient timing algorithms used by XHProf using
+ * It works on PHP 7 and improves on the ancient timing algorithms used by XHProf using
  * more modern Linux APIs to collect high performance timing data.
  *
  * The TIDEWAYS_* constants are similar to the ones by XHProf, however you need to disable timeline
@@ -55,8 +55,8 @@
  */
 
 // this file should not - under no circumstances - interfere with any other application
-if (!extension_loaded('xhprof') && !extension_loaded('uprofiler') && !extension_loaded('tideways')) {
-    error_log('xhgui - either extension xhprof, uprofiler or tideways must be loaded');
+if (!extension_loaded('xhprof') && !extension_loaded('uprofiler') && !extension_loaded('tideways') && !extension_loaded('tideways_xhprof')) {
+    error_log('xhgui - either extension xhprof, uprofiler, tideways or tideways_xhprof must be loaded');
     return;
 }
 
@@ -86,15 +86,18 @@ if (!isset($_SERVER['REQUEST_TIME_FLOAT'])) {
     $_SERVER['REQUEST_TIME_FLOAT'] = microtime(true);
 }
 
+$options = Xhgui_Config::read('profiler.options');
 if (extension_loaded('uprofiler')) {
-    uprofiler_enable(UPROFILER_FLAGS_CPU | UPROFILER_FLAGS_MEMORY);
-} else if (extension_loaded('tideways')) {
-    tideways_enable(TIDEWAYS_FLAGS_CPU | TIDEWAYS_FLAGS_MEMORY | TIDEWAYS_FLAGS_NO_SPANS);
+    uprofiler_enable(UPROFILER_FLAGS_CPU | UPROFILER_FLAGS_MEMORY, $options);
+} elseif (extension_loaded('tideways_xhprof')) {
+    tideways_xhprof_enable(TIDEWAYS_XHPROF_FLAGS_CPU | TIDEWAYS_XHPROF_FLAGS_MEMORY);
+} elseif (extension_loaded('tideways')) {
+    tideways_enable(TIDEWAYS_FLAGS_CPU | TIDEWAYS_FLAGS_MEMORY | TIDEWAYS_FLAGS_NO_SPANS, $options);
 } else {
     if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 4) {
-        xhprof_enable(XHPROF_FLAGS_CPU | XHPROF_FLAGS_MEMORY | XHPROF_FLAGS_NO_BUILTINS);
+        xhprof_enable(XHPROF_FLAGS_CPU | XHPROF_FLAGS_MEMORY | XHPROF_FLAGS_NO_BUILTINS, $options);
     } else {
-        xhprof_enable(XHPROF_FLAGS_CPU | XHPROF_FLAGS_MEMORY);
+        xhprof_enable(XHPROF_FLAGS_CPU | XHPROF_FLAGS_MEMORY, $options);
     }
 }
 
@@ -102,7 +105,9 @@ register_shutdown_function(
     function () {
         if (extension_loaded('uprofiler')) {
             $data['profile'] = uprofiler_disable();
-        } else if (extension_loaded('tideways')) {
+        } elseif (extension_loaded('tideways_xhprof')) {
+            $data['profile'] = tideways_xhprof_disable();
+        } elseif (extension_loaded('tideways')) {
             $data['profile'] = tideways_disable();
         } else {
             $data['profile'] = xhprof_disable();
@@ -130,7 +135,9 @@ register_shutdown_function(
         $time = array_key_exists('REQUEST_TIME', $_SERVER)
             ? $_SERVER['REQUEST_TIME']
             : time();
-        $requestTimeFloat = explode('.', $_SERVER['REQUEST_TIME_FLOAT']);
+        // In some cases there is comma instead of dot
+        $delimiter = (strpos($_SERVER['REQUEST_TIME_FLOAT'], ',') !== false) ? ',' : '.';
+        $requestTimeFloat = explode($delimiter, $_SERVER['REQUEST_TIME_FLOAT']);
         if (!isset($requestTimeFloat[1])) {
             $requestTimeFloat[1] = 0;
         }

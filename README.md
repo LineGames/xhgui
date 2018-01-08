@@ -71,6 +71,7 @@ Installation
    > db.results.ensureIndex( { 'profile.main().mu' : -1 } )
    > db.results.ensureIndex( { 'profile.main().cpu' : -1 } )
    > db.results.ensureIndex( { 'meta.url' : 1 } )
+   > db.results.ensureIndex( { 'meta.simple_url' : 1 } )
    ```
 
 7. Run XHGui's install script. The install script downloads composer and
@@ -203,6 +204,23 @@ return array(
 
 The URL argument is the `REQUEST_URI` or `argv` value.
 
+Configure ignored functions
+---------------------------
+
+You can use the `profiler.options` configuration value to set additional options
+for the profiler extension. This is useful when you want to exclude specific
+functions from your profiler data:
+
+```php
+// In config/config.php
+return array(
+    //Other config
+    'profiler.options' => [
+        'ignored_functions' => ['call_user_func', 'call_user_func_array']
+    ]
+);
+```
+
 
 Profile an Application or Site
 ==============================
@@ -329,18 +347,13 @@ Using Tideways Extension
 ========================
 
 The XHProf PHP extension is not compatible with PHP7.0+. Instead you'll need to
-use the [tideways extension](https://github.com/tideways/php-profiler-extension).
+use the [tideways_xhprof extension](https://github.com/tideways/php-profiler-extension).
 
 Once installed, you can use the following configuration data:
 
 ```ini
-[tideways]
-extension="/path/to/tideways/tideways.so"
-tideways.connection=unix:///usr/local/var/run/tidewaysd.sock
-tideways.load_library=0
-tideways.auto_prepend_library=0
-tideways.auto_start=0
-tideways.sample_rate=100
+[tideways_xhprof]
+extension="/path/to/tideways/tideways_xhprof.so"
 ```
 
 Releases / Changelog

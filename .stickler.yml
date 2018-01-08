@@ -1,0 +1,10 @@
+linters:
+  phpcs:
+    standard: PSR2
+  csslint:
+    ignore: 'ids,known-properties'
+files:
+  ignore:
+    - 'bower_components/*'
+    - 'node_modules/*'
+    - 'vendor/*'
