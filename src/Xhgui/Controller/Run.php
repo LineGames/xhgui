@@ -48,11 +48,25 @@ class Xhgui_Controller_Run extends Xhgui_Controller
             'direction' => $result['direction']
         );
 
+        $runs = $result['results'];
+
+        foreach ($runs as $run) {
+            $url = $run->getMeta('url');
+            preg_match("/^([^\/\:\s\?]+):(.+)$/", $url, $matches, PREG_OFFSET_CAPTURE);
+
+            if (count($matches) > 1) {
+                $run->setMeta('simple_url', $url);
+
+                $run->setMeta('url', $matches[2][0]);
+                $run->setMeta('tag', $matches[1][0]);
+            }
+        }
+
         $this->_template = 'runs/list.twig';
         $this->set(array(
             'paging' => $paging,
             'base_url' => 'home',
-            'runs' => $result['results'],
+            'runs' => $runs,
             'date_format' => $this->_app->config('date.format'),
             'search' => $search,
             'has_search' => strlen(implode('', $search)) > 0,

@@ -59,6 +59,10 @@
                     'url.view',
                     {'url': result.meta.simple_url}
                 ) }}
+
+                {% if result.meta.tag %}
+                    <span class="label label-warning">{{ result.meta.tag }}</span>
+                {% endif %}
             </td>
             <td>
               <a href="{{ url('run.view', {'id': result.id|trim }) }}">
