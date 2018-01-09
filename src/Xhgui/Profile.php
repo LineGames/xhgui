@@ -163,6 +163,33 @@ class Xhgui_Profile
     }
 
     /**
+     * Set meta data about the profile.
+     *
+     * @param string $key The dotted key to read.
+     * @param mixed $value The value to be assign.
+     * @return boolean
+     */
+    public function setMeta($key = null, $value = null)
+    {
+        $data =& $this->_data['meta'];
+        if ($key === null) {
+            return;
+        }
+        $parts = explode('.', $key);
+        $lastKey = end($parts);
+        foreach ($parts as $key) {
+            if ($key === $lastKey) {
+                $data[$key] = $value;
+            } elseif (is_array($data)) {
+                $data =& $data[$key];
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Read data from the profile run.
      *
      * @param string $key The function key name to read.
