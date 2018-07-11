@@ -232,7 +232,9 @@ class Xhgui_Profiles
                 )
             ),
             array('$sort' => array('_id' => 1))
-        ));
+        ),
+            array('cursor' => array('batchSize' => 0))
+        );
         if (empty($results['result'])) {
             return array();
         }
@@ -264,6 +266,17 @@ class Xhgui_Profiles
     public function insert($profile)
     {
         return $this->_collection->insert($profile, array('w' => 0));
+    }
+
+    /**
+     * Delete a profile run.
+     *
+     * @param $id The profile id to delete.
+     * @return array|bool
+     */
+    public function delete($id)
+    {
+        return $this->_collection->remove(array('_id' => new MongoId($id)), array());
     }
 
     /**

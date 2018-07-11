@@ -12,11 +12,10 @@ class Controller_RunTest extends PHPUnit_Framework_TestCase
         ));
 
         $di = Xhgui_ServiceContainer::instance();
-        $mock = $this->getMock(
-                'Slim\Slim',
-                array('redirect', 'render', 'urlFor'),
-                array($di['config'])
-            );
+        $mock = $this->getMockBuilder('Slim\Slim')
+            ->setMethods(array('redirect', 'render', 'urlFor'))
+            ->setConstructorArgs(array($di['config']))
+            ->getMock();
 
         $di['app'] = $di->share(function ($c) use ($mock) {
             return $mock;
@@ -138,7 +137,7 @@ class Controller_RunTest extends PHPUnit_Framework_TestCase
 
     public function testCallgraph()
     {
-        loadFixture($this->profiles, 'tests/fixtures/results.json');
+        loadFixture($this->profiles, XHGUI_ROOT_DIR . '/tests/fixtures/results.json');
         Environment::mock(array(
             'SCRIPT_NAME' => 'index.php',
             'PATH_INFO' => '/',
@@ -154,7 +153,7 @@ class Controller_RunTest extends PHPUnit_Framework_TestCase
 
     public function testCallgraphData()
     {
-        loadFixture($this->profiles, 'tests/fixtures/results.json');
+        loadFixture($this->profiles, XHGUI_ROOT_DIR . '/tests/fixtures/results.json');
         Environment::mock(array(
             'SCRIPT_NAME' => 'index.php',
             'PATH_INFO' => '/',
@@ -168,4 +167,54 @@ class Controller_RunTest extends PHPUnit_Framework_TestCase
         $this->assertStringStartsWith('{"', $response->body());
     }
 
+    public function testDelete()
+    {
+        loadFixture($this->profiles, XHGUI_ROOT_DIR . '/tests/fixtures/results.json');
+
+        Environment::mock(array(
+            'SCRIPT_NAME' => 'index.php',
+            'PATH_INFO' => '/run/delete',
+            'QUERY_STRING' => 'id=aaaaaaaaaaaaaaaaaaaaaaaa',
+        ));
+
+        $this->app->expects($this->once())
+            ->method('urlFor')
+            ->with('home');
+
+        $this->app->expects($this->once())
+            ->method('redirect');
+
+        $result = $this->profiles->getAll();
+        $this->assertCount(5, $result['results']);
+
+        $this->runs->delete();
+
+        $result = $this->profiles->getAll();
+        $this->assertCount(4, $result['results']);
+    }
+
+    public function testDeleteAll()
+    {
+        loadFixture($this->profiles, XHGUI_ROOT_DIR . '/tests/fixtures/results.json');
+
+        Environment::mock(array(
+          'SCRIPT_NAME' => 'index.php',
+          'PATH_INFO' => '/run/delete_all',
+        ));
+
+        $this->app->expects($this->once())
+          ->method('urlFor')
+          ->with('home');
+
+        $this->app->expects($this->once())
+          ->method('redirect');
+
+        $result = $this->profiles->getAll();
+        $this->assertCount(5, $result['results']);
+
+        $this->runs->deleteAll();
+
+        $result = $this->profiles->getAll();
+        $this->assertCount(0, $result['results']);
+    }
 }
