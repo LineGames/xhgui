@@ -1,6 +1,6 @@
 <?php
 $dir = dirname(__DIR__);
-require_once $dir . '/src/Xhgui/Config.php';
+require_once $dir . '/src/bootstrap.php';
 Xhgui_Config::load($dir . '/config/config.default.php');
 if (file_exists($dir . '/config/config.php')) {
     Xhgui_Config::load($dir . '/config/config.php');
