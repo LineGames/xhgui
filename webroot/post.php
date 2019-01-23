@@ -29,8 +29,6 @@ if (count($requestTimeFloat) === 1) {
 $requestTs = new MongoDate($time);
 $requestTsMicro = new MongoDate($requestTimeFloat[0], $requestTimeFloat[1]);
 
-$data['_id'] = new MongoId();
-
 $data['meta'] = array(
     'url' => $uri,
     'SERVER' => $__SERVER,
@@ -50,6 +48,6 @@ try {
     $saver = Xhgui_Saver::factory($config);
     $saver->save($data);
 
-    echo $data['_id'];
+    echo Xhgui_Saver_Mongo::getLastProfilingId();
 } catch (Exception $e) {
 }
