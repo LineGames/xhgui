@@ -122,23 +122,50 @@ class Xhgui_Controller_Run extends Xhgui_Controller
         ));
     }
 
-    public function delete()
+    public function deleteForm()
     {
         $request = $this->app->request();
         $id = $request->get('id');
+        if (!is_string($id) || !strlen($id)) {
+            throw new Exception('The "id" parameter is required.');
+        }
+
+        // Get details
+        $result = $this->profiles->get($id);
+
+        $this->_template = 'runs/delete-form.twig';
+        $this->set(array(
+            'run_id' => $id,
+            'result' => $result,
+        ));
+    }
+
+    public function deleteSubmit()
+    {
+        $request = $this->app->request();
+        $id = $request->post('id');
+        // Don't call profilers->delete() unless $id is set,
+        // otherwise it will turn the null into a MongoId and return "Sucessful".
+        if (!is_string($id) || !strlen($id)) {
+            // Form checks this already,
+            // only reachable by handcrafted or malformed requests.
+            throw new Exception('The "id" parameter is required.');
+        }
 
         // Delete the profile run.
         $delete = $this->profiles->delete($id);
 
         $this->app->flash('success', 'Deleted profile ' . $id);
 
-        $referrer = $request->getReferrer();
-        // In case route is accessed directly the referrer is not set.
-        $redirect = isset($referrer) ? $referrer : $this->app->urlFor('home');
-        $this->app->redirect($redirect);
+        $this->app->redirect($this->app->urlFor('home'));
     }
 
-    public function deleteAll()
+    public function deleteAllForm()
+    {
+        $this->_template = 'runs/delete-all-form.twig';
+    }
+
+    public function deleteAllSubmit()
     {
         $request = $this->app->request();
 
@@ -147,10 +174,7 @@ class Xhgui_Controller_Run extends Xhgui_Controller
 
         $this->app->flash('success', 'Deleted all profiles');
 
-        $referrer = $request->getReferrer();
-        // In case route is accessed directly the referrer is not set.
-        $redirect = isset($referrer) ? $referrer : $this->app->urlFor('home');
-        $this->app->redirect($redirect);
+        $this->app->redirect($this->app->urlFor('home'));
     }
 
     public function url()
@@ -327,31 +351,6 @@ class Xhgui_Controller_Run extends Xhgui_Controller
 
         $response['Content-Type'] = 'application/json';
         return $response->body(json_encode($callgraph));
-    }
-
-    public function flamegraph()
-    {
-        $request = $this->app->request();
-        $profile = $this->profiles->get($request->get('id'));
-
-        $this->_template = 'runs/flamegraph.twig';
-        $this->set(array(
-            'profile' => $profile,
-            'date_format' => $this->app->config('date.format'),
-        ));
-    }
-
-    public function flamegraphData()
-    {
-        $request = $this->app->request();
-        $response = $this->app->response();
-        $profile = $this->profiles->get($request->get('id'));
-        $metric = $request->get('metric') ?: 'wt';
-        $threshold = (float)$request->get('threshold') ?: 0.01;
-        $flamegraph = $profile->getFlamegraph($metric, $threshold);
-
-        $response['Content-Type'] = 'application/json';
-        return $response->body(json_encode($flamegraph));
     }
 
     public function callgraphDataDot()
