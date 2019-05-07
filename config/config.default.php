@@ -19,6 +19,13 @@ return array(
     //
     'save.handler' => 'mongodb',
 
+    'pdo' => array(
+        'dsn' => null,
+        'user' => null,
+        'pass' => null,
+        'table' => 'results'
+    ),
+
     // Database options for MongoDB.
     //
     // - db.host: Connection string in the form `mongodb://[ip or host]:[port]`.
@@ -29,9 +36,13 @@ return array(
     //               for example 'username', 'password', or 'replicaSet'.
     //               See <https://secure.php.net/mongoclient_construct#options>.
     //
-    'db.host' => 'mongodb://127.0.0.1:27017',
-    'db.db' => 'xhprof',
+    'db.host' => getenv('XHGUI_MONGO_HOST') ?: 'mongodb://127.0.0.1:27017',
+    'db.db' => getenv('XHGUI_MONGO_DATABASE') ?: 'xhprof',
     'db.options' => array(),
+    'run.view.filter.names' => array(
+        'Zend*',
+        'Composer*',
+    ),
 
     // Whether to instrument a user request.
     //
@@ -64,6 +75,10 @@ return array(
     // Default: Remove numeric values after `=`. For example,
     // it turns "/foo?page=2" into "/foo?page".
     'profiler.simple_url' => null,
+
+    // Enable to clean up the url saved to the DB
+    // in this way is possible to remove sensitive data or other kind of data
+    'profiler.replace_url' => null,
 
     // Additional options to be passed to the `_enable()` function
     // of the profiler extension (xhprof, tideways, etc.).
