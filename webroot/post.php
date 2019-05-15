@@ -35,8 +35,13 @@ $data['meta'] = array(
     'get' => $__GET,
     'env' => $__ENV,
     'simple_url' => Xhgui_Util::simpleUrl($uri),
-    'request_ts' => $requestTs,
-    'request_ts_micro' => $requestTsMicro,
+    'request_ts' => [
+    	'sec' => $time,
+    ],
+    'request_ts_micro' => [
+    	'sec' => $requestTimeFloat[0],
+    	'usec' => $requestTimeFloat[1],
+    ],
     'request_date' => date('Y-m-d', $time),
 );
 
@@ -44,7 +49,6 @@ $data['profile'] = json_decode($_POST['profile']);
 
 try {
     $config = Xhgui_Config::all();
-    $config += array('db.options' => array());
     $saver = Xhgui_Saver::factory($config);
     $saver->save($data);
 
